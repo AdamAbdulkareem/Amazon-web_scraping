@@ -6,7 +6,7 @@ import time
 import datetime
 
 # connect to amazon website
-URL = "https://www.amazon.com/Apple-MacBook-Pro-Early-2023/dp/B0BZFNLQ4B/ref=sr_1_3?crid=769U42S0EEX9&keywords=macbook+pro+2023&qid=1688547724&sprefix=macbook+pro+2023%2Caps%2C287&sr=8-3"
+URL = "https://www.amazon.com/Apple-MacBook-Laptop-12%E2%80%91core-19%E2%80%91core/dp/B0BSHDT7F5/ref=psdc_565108_t1_B0BZFNLQ4B"
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
@@ -20,6 +20,10 @@ page = requests.get(URL, headers=headers)
 soup_1 = BeautifulSoup(page.content, "html.parser")
 soup_2 = BeautifulSoup(soup_1.prettify(), "html.parser")
 
-title = soup_2.find(id='productTitle').get_text()
+title = soup_2.find(id="productTitle").get_text()
+price = soup_2.find(class_="a-offscreen").get_text()
+rating = soup_2.find(class_="a-icon-alt").get_text()
 
-print(title)
+print(title.encode('utf-8'))
+print(price)
+print(rating)
