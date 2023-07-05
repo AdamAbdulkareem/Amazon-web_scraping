@@ -56,4 +56,6 @@ def check_price():
             writer.writerow(data)
         return
 
-check_price()
+while(True):
+    check_price()
+    time.sleep(10)
