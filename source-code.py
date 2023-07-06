@@ -6,8 +6,50 @@ import os
 import smtplib
 import time
 import datetime
+import re
 
+def check_price(identifier):
+            URL = f"https://www.amazon.com/dp/{str(identifier)}"
+            
+            headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "Upgrade-Insecure-Requests": "1",
+            }
+            
+            page = requests.get(URL, headers=headers)
+            page.raise_for_status()
 
+            soup = BeautifulSoup(page.content, "html.parser")
+            
+            if price_element := soup.find(class_="a-offscreen"):
+                
+                    pattern = r'^\$\d'   
+                    
+                    if re.match(pattern, price_element.get_text()):
+                        price = price_element.get_text()
+                        
+                    else:
+                        price = "N/A"
+                                
+            if ratings_element:= soup.find(class_="a-icon-alt"):
+                
+                    pattern = r"\d\.\d out of \d stars"
+                    
+                    if re.match(pattern, ratings_element.get_text()):
+                        ratings = ratings_element.get_text()
+                        
+                    else:
+                        ratings = "N/A"
+            
+            num_reviews_element = soup.find(id="acrCustomerReviewText", class_="a-size-base")
+            num_reviews = num_reviews_element.get_text() if num_reviews_element else "N/A"
+            
+            date = datetime.date.today()
+            
+            return price, ratings, num_reviews, date
+        
 def extract_product_names():
     for num in range(1, 15):
         URL = (
@@ -32,74 +74,32 @@ def extract_product_names():
             
             file_path = "./Amazon_Web_Dataset.csv"
             
+            
             if not os.path.exists(file_path):
-                header = ["Title", "ID"] 
+                header = ["Title", "ID", "Price", "Ratings", "Number of reviews", "Date"] 
                 with open("Amazon_Web_Dataset.csv", mode="w", newline="", encoding="utf-8") as file:
                     writer = csv.writer(file)
                     writer.writerow(header)
-            
+                    
+                    
             for title_element, element in zip(title_elements, id_elements):
+                
                 product_name = title_element.get("alt")
-                asin = element["data-asin"]
-                data = [product_name, asin]
-
+                identifier = element["data-asin"]
+                
+                price, ratings, num_reviews, date = check_price(identifier)
+                
+                data = [product_name, identifier, price, ratings, num_reviews, date]   
                 with open("Amazon_Web_Dataset.csv", mode="a+", newline="", encoding="utf-8") as file:
                     writer = csv.writer(file)
                     writer.writerow(data)
             
         except requests.RequestException as e:
             return f"An error occurred: {type(e).__name__} - {str(e)}"
-
+        
+    
+            
 extract_product_names()
-
-
-# def check_price():
-
-#     # connect to amazon website
-#     URL = "https://www.amazon.com/Apple-MacBook-Laptop-12%E2%80%91core-19%E2%80%91core/dp/B0BSHDT7F5/ref=psdc_565108_t1_B0BZFNLQ4B"
-
-#     headers = {
-#        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-#        "Accept-Encoding": "gzip, deflate, br",
-#        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-#        "Upgrade-Insecure-Requests": "1",
-#        }
-
-#     page = requests.get(URL, headers=headers)
-
-#     soup_1 = BeautifulSoup(page.content, "html.parser")
-#     soup_2 = BeautifulSoup(soup_1.prettify(), "html.parser")
-
-
-#     title = soup_2.find(id="productTitle").get_text()
-#     price = soup_2.find(class_="a-offscreen").get_text()
-#     ratings = soup_2.find(class_="a-icon-alt").get_text()
-#     num_reviews = soup_2.find(id="acrCustomerReviewText").get_text()
-
-#     today = datetime.date.today()
-
-#     title = title.strip()
-#     price = price.strip()
-#     ratings = ratings.strip()
-#     num_reviews = num_reviews.strip()
-
-#     header = ["Title", "Price", "Rating", "Number of reviews", "Date"]
-#     data = [title, price, ratings, num_reviews, today]
-
-
-#     file_path = "./AmazonWebDataset.csv"
-#     if os.path.exists(file_path):
-#         # Now we are appending data to the csv file
-#         with open("AmazonWebDataset.csv", mode="a+", newline="", encoding="utf-8") as file:
-#             writer = csv.writer(file)
-#             writer.writerow(data)
-#         return
-#     else:
-#         with open("AmazonWebDataset.csv", mode="w", newline="", encoding="utf-8") as file:
-#             writer = csv.writer(file)
-#             writer.writerow(header)
-#             writer.writerow(data)
-#         return
 
 # while(True):
 #     check_price()
