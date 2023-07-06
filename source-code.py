@@ -9,7 +9,7 @@ import datetime
 
 
 def extract_product_names():
-    for num in range(1, 12):
+    for num in range(1, 15):
         URL = (
             "https://www.amazon.com/s?k=macbook&i=electronics&rh=n%3A172282%2Cp_89%3AApple%2Cp_n_availability%3A2661601011&page="
             + str(num)
