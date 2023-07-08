@@ -4,8 +4,8 @@ import requests
 import csv
 import os
 import smtplib
-import time
-import datetime
+from datetime import date
+from datetime import datetime
 import re
 
 def check_price(identifier):
@@ -46,12 +46,13 @@ def check_price(identifier):
             num_reviews_element = soup.find(id="acrCustomerReviewText", class_="a-size-base")
             num_reviews = num_reviews_element.get_text() if num_reviews_element else "N/A"
             
-            date = datetime.date.today()
+            current_date = date.today().strftime("%B %d, %Y")
+            current_time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
             
-            return price, ratings, num_reviews, date
+            return price, ratings, num_reviews, current_date, current_time
         
 def extract_product_names():
-    for num in range(1, 15):
+    for num in range(1, 2):
         URL = (
             "https://www.amazon.com/s?k=macbook&i=electronics&rh=n%3A172282%2Cp_89%3AApple%2Cp_n_availability%3A2661601011&page="
             + str(num)
@@ -76,7 +77,7 @@ def extract_product_names():
             
             
             if not os.path.exists(file_path):
-                header = ["Title", "ID", "Price", "Ratings", "Number of reviews", "Date"] 
+                header = ["Title", "ID", "Price", "Ratings", "Number of reviews", "Date", "Time"] 
                 with open("Amazon_Web_Dataset.csv", mode="w", newline="", encoding="utf-8") as file:
                     writer = csv.writer(file)
                     writer.writerow(header)
